@@ -16,6 +16,10 @@ class Tile(OzonModel):
     price_regular: str | None = Field(default=None, description="Ozon's «С другими банками» price, when it differs.")
     price_old: str | None = Field(default=None, description="The struck-through price Ozon compares against.")
     url: str | None = None
+    image: str | None = Field(
+        default=None,
+        description="The tile's own picture, the first one Ozon renders for the product.",
+    )
     seller: str | None = Field(default=None, description="Set on offers from other sellers, which carry no title.")
     delivery: str | None = Field(default=None, description='Ozon\'s own line, e.g. "Доставим 9 сентября".')
 

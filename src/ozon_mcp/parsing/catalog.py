@@ -109,9 +109,26 @@ def parse_tiles(data: dict[str, Any]) -> list[Tile]:
                 price=price,
                 price_old=price_old,
                 url=f"https://www.ozon.ru/product/{sku}/" if sku else None,
+                image=_tile_image(item),
             )
         )
     return tiles
+
+
+def _tile_image(item: dict[str, Any]) -> str | None:
+    """The tile's picture, taken as the first image URL anywhere in the tile.
+
+    A tile states no image field of its own — the URL sits wherever the atom
+    that draws it happens to live, and that place differs between the search
+    grid and the purchases list. Matching the CDN pattern over the whole tile
+    holds across both, and the first match is the cover: Ozon renders it first.
+
+    Worth having rather than reading the product card per item: a purchases
+    page carries a picture for every tile it returns, while a card costs its
+    own request.
+    """
+    found = IMAGE_RE.search(dumps(item))
+    return found.group(0) if found else None
 
 
 def parse_gallery(data: dict[str, Any]) -> list[str]:
