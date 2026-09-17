@@ -10,11 +10,11 @@ from typing import Final
 from mcp.server.fastmcp import FastMCP
 
 from ozon_mcp.mcp_server import mcp as _server
-from ozon_mcp.tools import cart, catalog, checkout, favorites, finance, orders, selections, session
+from ozon_mcp.tools import cart, catalog, checkout, favorites, finance, orders, selections, session, store
 
 # Naming the modules keeps the registration visible instead of leaving it to a
 # side effect nobody can see.
-TOOL_MODULES: Final = (orders, catalog, cart, favorites, selections, checkout, session, finance)
+TOOL_MODULES: Final = (orders, catalog, cart, favorites, selections, checkout, session, finance, store)
 
 
 def build_server() -> FastMCP:

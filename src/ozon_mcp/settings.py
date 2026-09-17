@@ -33,6 +33,9 @@ class OzonSettings(BaseSettings):
     enable_orders: bool = False
     """Allow place_order. Separate from enable_writes: this one spends money."""
 
+    store_path: Path = Path("/data/store.db")
+    """The local copy of the account: purchases, orders, parcels, price history."""
+
     monitor_store: Path = Path("/data/price_history.json")
     """Where favorites price-monitoring snapshots are persisted."""
 
