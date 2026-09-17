@@ -432,9 +432,8 @@ def bought_items(
     A sku found in several parcels counts as received if any of them was, which
     is what "I have it" means when one of two was refused.
     """
-    from marketplace_mcp.adapters.ozon.services.orders import (
-        list_orders,
-    )
+    # Imported here, not at the top: the two modules import each other.
+    from marketplace_mcp.adapters.ozon.services.orders import list_orders  # ruff: ignore[import-outside-top-level]
 
     found = (
         [Purchase(sku=str(sku), url=f"https://www.ozon.ru/product/{sku}/") for sku in skus]

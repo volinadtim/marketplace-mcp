@@ -551,9 +551,8 @@ def _amount_due(page: dict[str, Any]) -> str | None:
 
 def _gap(amount: str | None) -> str | None:
     """What the Ozon Card balance is short of ``amount``, if anything."""
-    from marketplace_mcp.adapters.ozon.services.finance import (
-        get_finances,
-    )
+    # Imported here, not at the top: the two modules import each other.
+    from marketplace_mcp.adapters.ozon.services.finance import get_finances  # ruff: ignore[import-outside-top-level]
 
     due = to_kopecks(amount)
     if due is None:

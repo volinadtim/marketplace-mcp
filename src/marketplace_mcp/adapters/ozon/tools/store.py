@@ -1,9 +1,10 @@
 """Keeping a local copy of the account, and asking it what Ozon cannot answer."""
 
-from typing import Annotated, Any
+from typing import Annotated, Any, Final
 
 from pydantic import Field
 
+from marketplace_mcp.adapters.ozon.source import OzonSource
 from marketplace_mcp.core.dependencies import run_blocking
 from marketplace_mcp.core.store import connect
 from marketplace_mcp.core.store.dedup import link_duplicates as _link_duplicates
@@ -12,8 +13,16 @@ from marketplace_mcp.core.store.writes import now as _now
 from marketplace_mcp.mcp_server import mcp
 from marketplace_mcp.settings import get_settings
 
+SOURCE: Final = OzonSource()
+
 
 def _run(work: Any) -> Any:
+    """Open the store for one call, hand it to the work, close it again.
+
+    A connection per call rather than one held open: the syncs run on the
+    session thread while a reader may be on another, and SQLite connections are
+    not to be shared across threads.
+    """
     connection = connect(get_settings().store_path)
     try:
         return work(connection)
@@ -33,7 +42,7 @@ async def sync_prices(
     Cheap: one walk, about a minute for a thousand items, no order pages. Safe to
     run daily — that is what builds a price history, since Ozon keeps none.
     """
-    report = await run_blocking(lambda: _run(lambda store: _sync_prices(store, limit)))
+    report = await run_blocking(lambda: _run(lambda store: _sync_prices(store, SOURCE, limit)))
     return report.__dict__
 
 
@@ -52,7 +61,7 @@ async def sync_orders(
     schema change. `stopped_at` in the answer says which stored order ended the
     walk, or is null if it reached the end of the history.
     """
-    report = await run_blocking(lambda: _run(lambda store: _sync_orders(store, full=full, limit=limit)))
+    report = await run_blocking(lambda: _run(lambda store: _sync_orders(store, SOURCE, full=full, limit=limit)))
     return report.__dict__
 
 
@@ -65,19 +74,29 @@ async def store_stats() -> dict[str, Any]:
     """
 
     def counts(store: Any) -> dict[str, Any]:
+        # Counted per marketplace, not across the store: this tool answers for
+        # Ozon, and the same file will hold other marketplaces beside it.
         tables = ("items", "orders", "parcels", "order_items", "price_observations")
         out: dict[str, Any] = {
-            table: store.execute(f"SELECT count(*) AS n FROM {table}").fetchone()["n"]  # ruff: ignore[hardcoded-sql-expression]
+            table: store.execute(
+                f"SELECT count(*) AS n FROM {table} WHERE marketplace = ?",  # ruff: ignore[hardcoded-sql-expression]
+                (SOURCE.name,),
+            ).fetchone()["n"]
             for table in tables
         }
-        span = store.execute("SELECT min(observed_at) AS a, max(observed_at) AS b FROM price_observations").fetchone()
+        span = store.execute(
+            "SELECT min(observed_at) AS a, max(observed_at) AS b FROM price_observations WHERE marketplace = ?",
+            (SOURCE.name,),
+        ).fetchone()
         out["prices_from"], out["prices_to"] = span["a"], span["b"]
+        out["marketplace"] = SOURCE.name
         out["path"] = str(get_settings().store_path)
         out["recent_syncs"] = [
             dict(row)
             for row in store.execute(
                 "SELECT started_at, finished_at, kind, orders_seen, orders_read, items_seen, note"
-                " FROM sync_runs ORDER BY started_at DESC LIMIT 5"
+                " FROM sync_runs WHERE marketplace = ? ORDER BY started_at DESC LIMIT 5",
+                (SOURCE.name,),
             )
         ]
         return out
@@ -100,4 +119,4 @@ async def link_duplicates() -> dict[str, Any]:
     reading through them is the caller's choice and a wrong call is undone by
     dropping a row.
     """
-    return await run_blocking(lambda: _run(lambda store: _link_duplicates(store, _now())))
+    return await run_blocking(lambda: _run(lambda store: _link_duplicates(store, SOURCE.name, _now())))

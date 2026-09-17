@@ -310,9 +310,8 @@ def _enter_checkout() -> None:
 
 def start_checkout(*, with_points: bool = True, with_shipments: bool | None = None) -> Checkout:
     """Form the checkout from the items currently ticked in the cart."""
-    from marketplace_mcp.adapters.ozon.services.cart import (
-        get_cart,
-    )
+    # Imported here, not at the top: the two modules import each other.
+    from marketplace_mcp.adapters.ozon.services.cart import get_cart  # ruff: ignore[import-outside-top-level]
 
     if not any(item.checked for item in get_cart().items):
         return Checkout(available=False, reason="no cart items are selected — select them first")

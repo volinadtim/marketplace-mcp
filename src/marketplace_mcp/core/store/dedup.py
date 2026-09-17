@@ -61,24 +61,33 @@ def normalise(title: str | None) -> str:
     return _SPACES.sub(" ", text).strip()
 
 
-def _known_titles(connection: Any) -> dict[str, str]:
+def _known_titles(connection: Any, marketplace: str) -> dict[str, str]:
     """Every sku with the best title known for it.
 
     The purchase list's title wins over an order's: it is the card's current
     name, and orders keep whatever the name was on the day.
     """
     titles: dict[str, str] = {}
-    for row in connection.execute("SELECT sku, title FROM order_items WHERE title IS NOT NULL"):
+    ordered = connection.execute(
+        "SELECT sku, title FROM order_items WHERE marketplace = ? AND title IS NOT NULL", (marketplace,)
+    )
+    for row in ordered:
         titles.setdefault(row["sku"], row["title"])
-    for row in connection.execute("SELECT sku, title FROM items WHERE title IS NOT NULL"):
+    listed = connection.execute(
+        "SELECT sku, title FROM items WHERE marketplace = ? AND title IS NOT NULL", (marketplace,)
+    )
+    for row in listed:
         titles[row["sku"]] = row["title"]
     return titles
 
 
-def _variants(connection: Any) -> dict[str, set[str]]:
+def _variants(connection: Any, marketplace: str) -> dict[str, set[str]]:
     """The variants each sku was ever ordered in."""
     out: dict[str, set[str]] = defaultdict(set)
-    for row in connection.execute("SELECT sku, variant FROM order_items WHERE variant IS NOT NULL"):
+    rows = connection.execute(
+        "SELECT sku, variant FROM order_items WHERE marketplace = ? AND variant IS NOT NULL", (marketplace,)
+    )
+    for row in rows:
         out[row["sku"]].add(row["variant"])
     return out
 
@@ -128,16 +137,19 @@ def _judge(key: str, skus: set[str], variants: dict[str, set[str]]) -> tuple[str
     return LINKED, key[:200]
 
 
-def link_duplicates(connection: Any, at: str) -> dict[str, Any]:
+def link_duplicates(connection: Any, marketplace: str, at: str) -> dict[str, Any]:
     """Link skus that are the same product; record the ones deliberately not.
 
     Returns what it did and what it refused to do, because the refusals are the
     interesting half: they are the pairs a title-only rule would have merged.
     """
-    titles = _known_titles(connection)
-    variants = _variants(connection)
-    listed = {row["sku"] for row in connection.execute("SELECT sku FROM items")}
-    ordered = {row["sku"] for row in connection.execute("SELECT DISTINCT sku FROM order_items")}
+    titles = _known_titles(connection, marketplace)
+    variants = _variants(connection, marketplace)
+    listed = {row["sku"] for row in connection.execute("SELECT sku FROM items WHERE marketplace = ?", (marketplace,))}
+    ordered = {
+        row["sku"]
+        for row in connection.execute("SELECT DISTINCT sku FROM order_items WHERE marketplace = ?", (marketplace,))
+    }
     complete = listed & ordered
 
     groups: dict[str, set[str]] = defaultdict(set)
@@ -156,13 +168,13 @@ def link_duplicates(connection: Any, at: str) -> dict[str, Any]:
         if method == SKIPPED:
             continue
         canonical = _canonical(skus, complete) if method == LINKED else None
-        linked.extend((sku, canonical or sku, method, note, at) for sku in sorted(skus))
+        linked.extend((marketplace, sku, canonical or sku, method, note, at) for sku in sorted(skus))
 
     connection.executemany(
         """
-        INSERT INTO item_links (sku, canonical_sku, method, note, linked_at)
-        VALUES (?, ?, ?, ?, ?)
-        ON CONFLICT(sku) DO UPDATE SET
+        INSERT INTO item_links (marketplace, sku, canonical_sku, method, note, linked_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(marketplace, sku) DO UPDATE SET
             canonical_sku = excluded.canonical_sku,
             method        = excluded.method,
             note          = excluded.note,
@@ -172,9 +184,10 @@ def link_duplicates(connection: Any, at: str) -> dict[str, Any]:
     )
     connection.commit()
 
-    merged = sum(1 for sku, canonical, method, _, _ in linked if method == LINKED and sku != canonical)
+    merged = sum(1 for _, sku, canonical, method, _, _ in linked if method == LINKED and sku != canonical)
     collisions = sum(1 for skus in groups.values() if len(skus) > 1)
     return {
+        "marketplace": marketplace,
         "skus_known": len(titles),
         "titles": len(groups),
         "collisions": collisions,

@@ -14,9 +14,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from marketplace_mcp.adapters.ozon.models.catalog import Purchase
-from marketplace_mcp.adapters.ozon.models.enums import OrderState
-from marketplace_mcp.adapters.ozon.models.orders import Order, OrderDetail, OrderProduct
+from marketplace_mcp.core.records import (
+    OrderRecord,
+    OrderState,
+    ParcelItemRecord,
+    ParcelRecord,
+    ProductRecord,
+)
 from marketplace_mcp.core.store import connect, writes
 from marketplace_mcp.core.store.dedup import ADJACENT, KEPT_APART, LINKED, SKIPPED, link_duplicates, normalise
 
@@ -25,6 +29,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 AT = "2026-09-17T00:00:00+00:00"
+OZON = "ozon"
 OLD, NEW = "140119905", "1615718914"  # a reissue: a billion apart, years between them
 
 
@@ -33,13 +38,14 @@ def _store(tmp_path: Path) -> sqlite3.Connection:
 
 
 def _ordered(store: sqlite3.Connection, sku: str, title: str, variant: str | None, shipment: str) -> None:
-    writes.save_order(store, Order(order_number="A-1", state=OrderState.RECEIVED), AT)
+    writes.save_order(store, OZON, OrderRecord(number="A-1", state=OrderState.RECEIVED), AT)
     writes.save_parcel(
         store,
-        OrderDetail(
+        OZON,
+        ParcelRecord(
             order_number="A-1",
             shipment_id=shipment,
-            products=[OrderProduct(sku=sku, title=title, variant=variant, price="100 ₽")],
+            items=[ParcelItemRecord(sku=sku, title=title, variant=variant, price="100 ₽")],
         ),
         AT,
     )
@@ -51,11 +57,11 @@ def _methods(store: sqlite3.Connection) -> set[str]:
 
 def test_a_reissued_card_is_linked_to_the_sku_that_has_both(tmp_path: Path) -> None:
     store = _store(tmp_path)
-    writes.save_items(store, [Purchase(sku=OLD, title="Гранола Bionova, 400 г")], AT)
-    writes.save_items(store, [Purchase(sku=NEW, title="Гранола BIONOVA, 400 г.")], AT)
+    writes.save_items(store, OZON, [ProductRecord(sku=OLD, title="Гранола Bionova, 400 г")], AT)
+    writes.save_items(store, OZON, [ProductRecord(sku=NEW, title="Гранола BIONOVA, 400 г.")], AT)
     _ordered(store, NEW, "Гранола Bionova, 400 г", None, "p1")
 
-    assert link_duplicates(store, AT)["skus_merged_away"] == 1
+    assert link_duplicates(store, OZON, AT)["skus_merged_away"] == 1
     rows = dict(store.execute("SELECT sku, canonical_sku FROM item_links").fetchall())
     assert rows[OLD] == NEW  # the one carrying both a card and an order
     assert rows[NEW] == NEW
@@ -67,10 +73,10 @@ def test_two_sizes_of_one_garment_stay_two_things(tmp_path: Path) -> None:
         ("1564640338", "46 RU / 31・Голубой", "p1"),
         ("2564640347", "48 RU / 32・Голубой", "p2"),
     ):
-        writes.save_items(store, [Purchase(sku=sku, title="Шорты DARE, 1 шт")], AT)
+        writes.save_items(store, OZON, [ProductRecord(sku=sku, title="Шорты DARE, 1 шт")], AT)
         _ordered(store, sku, "Шорты DARE, 1 шт", variant, shipment)
 
-    report = link_duplicates(store, AT)
+    report = link_duplicates(store, OZON, AT)
     assert report["skus_merged_away"] == 0
     assert report["groups_kept_apart"] == 1
     rows = store.execute("SELECT sku, canonical_sku, note FROM item_links ORDER BY sku").fetchall()
@@ -84,10 +90,10 @@ def test_one_colour_named_twice_is_still_one_product(tmp_path: Path) -> None:
     """
     store = _store(tmp_path)
     for sku, shipment in ((OLD, "p1"), (NEW, "p2")):
-        writes.save_items(store, [Purchase(sku=sku, title="Набор линз для телефона")], AT)
+        writes.save_items(store, OZON, [ProductRecord(sku=sku, title="Набор линз для телефона")], AT)
         _ordered(store, sku, "Набор линз для телефона", "Черный", shipment)
 
-    assert link_duplicates(store, AT)["skus_merged_away"] == 1
+    assert link_duplicates(store, OZON, AT)["skus_merged_away"] == 1
 
 
 def test_skus_numbered_together_are_a_listing_not_a_reissue(tmp_path: Path) -> None:
@@ -97,9 +103,9 @@ def test_skus_numbered_together_are_a_listing_not_a_reissue(tmp_path: Path) -> N
     """
     store = _store(tmp_path)
     for sku in ("233673815", "233673821"):
-        writes.save_items(store, [Purchase(sku=sku, title="Magazzino микрофон петличный серый черный")], AT)
+        writes.save_items(store, OZON, [ProductRecord(sku=sku, title="Magazzino микрофон петличный серый черный")], AT)
 
-    report = link_duplicates(store, AT)
+    report = link_duplicates(store, OZON, AT)
     assert report["skus_merged_away"] == 0
     assert report["groups_adjacent_skus"] == 1
     assert _methods(store) == {ADJACENT}
@@ -111,9 +117,9 @@ def test_a_placeholder_is_not_a_name(tmp_path: Path) -> None:
     """
     store = _store(tmp_path)
     for sku in (OLD, NEW):
-        writes.save_items(store, [Purchase(sku=sku, title="Недоступно в вашем регионе")], AT)
+        writes.save_items(store, OZON, [ProductRecord(sku=sku, title="Недоступно в вашем регионе")], AT)
 
-    report = link_duplicates(store, AT)
+    report = link_duplicates(store, OZON, AT)
     assert report["groups_unidentifying_title"] == 1
     assert store.execute("SELECT count(*) AS n FROM item_links").fetchone()["n"] == 0
 
@@ -121,24 +127,24 @@ def test_a_placeholder_is_not_a_name(tmp_path: Path) -> None:
 def test_a_bare_category_is_not_a_name(tmp_path: Path) -> None:
     store = _store(tmp_path)
     for sku in (OLD, NEW):
-        writes.save_items(store, [Purchase(sku=sku, title="Футболка")], AT)
-    assert link_duplicates(store, AT)["groups_unidentifying_title"] == 1
+        writes.save_items(store, OZON, [ProductRecord(sku=sku, title="Футболка")], AT)
+    assert link_duplicates(store, OZON, AT)["groups_unidentifying_title"] == 1
 
 
 def test_a_title_held_by_one_sku_is_not_a_group(tmp_path: Path) -> None:
     store = _store(tmp_path)
-    writes.save_items(store, [Purchase(sku=OLD, title="Что-то одно")], AT)
-    assert link_duplicates(store, AT)["skus_merged_away"] == 0
+    writes.save_items(store, OZON, [ProductRecord(sku=OLD, title="Что-то одно")], AT)
+    assert link_duplicates(store, OZON, AT)["skus_merged_away"] == 0
     assert store.execute("SELECT count(*) AS n FROM item_links").fetchone()["n"] == 0
 
 
 def test_linking_twice_does_not_reverse_the_arrows(tmp_path: Path) -> None:
     store = _store(tmp_path)
     for sku in (OLD, NEW):
-        writes.save_items(store, [Purchase(sku=sku, title="Гранола Bionova")], AT)
-    link_duplicates(store, AT)
+        writes.save_items(store, OZON, [ProductRecord(sku=sku, title="Гранола Bionova")], AT)
+    link_duplicates(store, OZON, AT)
     before = dict(store.execute("SELECT sku, canonical_sku FROM item_links").fetchall())
-    link_duplicates(store, AT)
+    link_duplicates(store, OZON, AT)
     assert dict(store.execute("SELECT sku, canonical_sku FROM item_links").fetchall()) == before
     assert _methods(store) == {LINKED}
 

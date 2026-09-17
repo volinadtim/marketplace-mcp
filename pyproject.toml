@@ -111,18 +111,25 @@ ignore = [
 ]
 # Boolean positional arguments: MCP tools receive flat JSON arguments, so a
 # boolean parameter cannot be made keyword-only.
-"src/marketplace_mcp/tools/*.py" = ["boolean-type-hint-positional-argument", "boolean-default-value-positional-argument"]
+"src/marketplace_mcp/adapters/ozon/tools/*.py" = ["boolean-type-hint-positional-argument", "boolean-default-value-positional-argument"]
 # Same reason: the checkout service mirrors the tool signature.
-"src/marketplace_mcp/services/checkout.py" = ["boolean-type-hint-positional-argument"]
+"src/marketplace_mcp/adapters/ozon/services/checkout.py" = ["boolean-type-hint-positional-argument"]
 # Same reason: cancel_order mirrors the tool signature.
-"src/marketplace_mcp/services/orders.py" = ["boolean-type-hint-positional-argument", "boolean-default-value-positional-argument"]
+"src/marketplace_mcp/adapters/ozon/services/orders.py" = ["boolean-type-hint-positional-argument", "boolean-default-value-positional-argument"]
+# no-self-use: the source classes exist to satisfy MarketplaceSource, so their
+# methods are the interface and stay methods whether or not they touch self.
+"src/marketplace_mcp/adapters/*/source.py" = ["no-self-use"]
+# hardcoded-sql-expression: the migration builds statements from table and
+# column names that are literals in this file. SQLite takes no parameters for an
+# identifier, so a rebuild cannot be written any other way.
+"src/marketplace_mcp/core/store/schema.py" = ["hardcoded-sql-expression"]
 # Binding all interfaces is the point: the container's port mapping decides what
 # is actually reachable.
 "src/marketplace_mcp/settings.py" = ["hardcoded-bind-all-interfaces"]
 # blind-except: any upstream failure is retried the same way, so the exception
 # type carries no decision. no-self-use: _sleep_before_retry is the seam the
 # transport tests replace, so it stays an instance method.
-"src/marketplace_mcp/session/transport.py" = ["blind-except", "no-self-use"]
+"src/marketplace_mcp/adapters/ozon/session/transport.py" = ["blind-except", "no-self-use"]
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
