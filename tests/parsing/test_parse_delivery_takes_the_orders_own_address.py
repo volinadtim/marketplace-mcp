@@ -8,6 +8,7 @@ instead gives a whole purchase history one address, and it looks right.
 from __future__ import annotations
 
 from ozon_mcp.parsing.orders import parse_delivery, parse_order_detail
+from ozon_mcp.utils.serde import dumps
 from support import page
 
 PICKUP = "Пункт Ozon, Россия, Санкт-Петербург, Малый проспект Васильевского острова, 17"
@@ -48,9 +49,8 @@ def test_the_recipient_block_is_not_an_address() -> None:
 
 def test_the_blocks_are_told_apart_by_tag_not_by_order() -> None:
     """Ozon serves address-then-recipient on one parcel and the reverse on the
-    next, so reading them by position swaps them on half a history."""
-    from ozon_mcp.utils.serde import dumps
-
+    next, so reading them by position swaps them on half a history.
+    """
     for first, second in (
         (_recipient_widget(), _address_widget("Доставка курьером", PICKUP)),
         (_address_widget("Доставка курьером", PICKUP), _recipient_widget()),
@@ -124,8 +124,6 @@ def _parcel(shipment: str, status: str, sku: str, title: str) -> dict[str, objec
 def _two_parcel_page() -> dict[str, object]:
     data = page(orderDetailsItem=_address_widget("Доставка в пункт выдачи", PICKUP))
     states = data["widgetStates"]
-    from ozon_mcp.utils.serde import dumps
-
     states["shipmentWidget-1-default-1"] = dumps(_parcel("111", "Получен", "1001", "Первый"))
     states["shipmentWidget-1-default-1-2"] = dumps(_parcel("222", "Отменён", "2002", "Второй"))
     return data

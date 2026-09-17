@@ -82,6 +82,20 @@ CREATE TABLE IF NOT EXISTS price_observations (
 
 CREATE INDEX IF NOT EXISTS price_observations_by_sku ON price_observations(sku, observed_at);
 
+-- The same product under two skus. Ozon reissues a card and the old sku stays
+-- in the purchase history, so one thing bought twice looks like two things.
+-- A link, never a merge: the rows keep their own prices and orders, and a
+-- judgement that turns out wrong is undone by deleting a row here.
+CREATE TABLE IF NOT EXISTS item_links (
+    sku           TEXT PRIMARY KEY,
+    canonical_sku TEXT NOT NULL,
+    method        TEXT NOT NULL,
+    note          TEXT,
+    linked_at     TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS item_links_by_canonical ON item_links(canonical_sku);
+
 CREATE TABLE IF NOT EXISTS sync_runs (
     started_at  TEXT PRIMARY KEY,
     finished_at TEXT,

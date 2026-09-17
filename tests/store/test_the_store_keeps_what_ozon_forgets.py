@@ -7,16 +7,19 @@ has re-reads a decade of orders every run.
 
 from __future__ import annotations
 
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from ozon_mcp.models.catalog import Purchase
 from ozon_mcp.models.enums import OrderState
 from ozon_mcp.models.orders import Delivery, Order, OrderDetail, OrderProduct
-from ozon_mcp.store import connect
-from ozon_mcp.store import writes
+from ozon_mcp.store import connect, writes
+
+if TYPE_CHECKING:
+    import sqlite3
+    from pathlib import Path
 
 
-def _store(tmp_path: Path):
+def _store(tmp_path: Path) -> sqlite3.Connection:
     return connect(tmp_path / "store.db")
 
 
@@ -94,4 +97,4 @@ def test_syncing_twice_does_not_duplicate_anything(tmp_path: Path) -> None:
         )
         writes.save_items(store, [_purchase("777", "219 ₽")], at)
     for table in ("orders", "parcels", "order_items", "items"):
-        assert store.execute(f"SELECT count(*) AS n FROM {table}").fetchone()["n"] == 1  # noqa: S608
+        assert store.execute(f"SELECT count(*) AS n FROM {table}").fetchone()["n"] == 1  # ruff: ignore[hardcoded-sql-expression]

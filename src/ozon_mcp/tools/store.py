@@ -8,7 +8,9 @@ from ozon_mcp.dependencies import run_blocking
 from ozon_mcp.mcp_server import mcp
 from ozon_mcp.settings import get_settings
 from ozon_mcp.store import connect
+from ozon_mcp.store.dedup import link_duplicates as _link_duplicates
 from ozon_mcp.store.sync import sync_orders as _sync_orders, sync_prices as _sync_prices
+from ozon_mcp.store.writes import now as _now
 
 
 def _run(work: Any) -> Any:
@@ -81,3 +83,21 @@ async def store_stats() -> dict[str, Any]:
         return out
 
     return await run_blocking(lambda: _run(counts))
+
+
+@mcp.tool()
+async def link_duplicates() -> dict[str, Any]:
+    """Find the same product stored under two skus and link them — without
+    merging anything.
+    Ozon reissues a card with a new sku and the old one stays in the purchase
+    history, so one thing bought twice reads as two products: one with the photo
+    and no purchase, one with the purchase and no photo.
+    Only groups where no sku states a variant are linked. A title is shared by a
+    size and a colour as readily as by a reissue («Шорты DARE» in 46 and in 48),
+    and those are two garments — they are recorded as examined, with the variants
+    that decided it, and left apart.
+    Nothing is deleted or rewritten: the links live in their own table, so
+    reading through them is the caller's choice and a wrong call is undone by
+    dropping a row.
+    """
+    return await run_blocking(lambda: _run(lambda store: _link_duplicates(store, _now())))
