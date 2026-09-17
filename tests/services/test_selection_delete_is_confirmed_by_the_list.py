@@ -10,8 +10,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from ozon_mcp.errors import OzonError
-from ozon_mcp.services import selections
+from marketplace_mcp.errors import OzonError
+from marketplace_mcp.services import selections
 from support import page
 
 if TYPE_CHECKING:

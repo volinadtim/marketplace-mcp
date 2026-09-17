@@ -244,14 +244,14 @@ See `env.example`.
 ## Running
 
 ```bash
-docker build -t ozon-mcp .
+docker build -t marketplace-mcp .
 
 # stdio: the client attaches to the container's stdin/stdout
-docker run -i --rm --shm-size=1g -v /opt/ozon-mcp:/data ozon-mcp
+docker run -i --rm --shm-size=1g -v /opt/marketplace-mcp:/data marketplace-mcp
 
 # http: long-lived service on :8084 (/mcp + /metrics)
-docker run -d --name ozon-mcp --shm-size=1g -v /opt/ozon-mcp:/data \
-  -e OZON_TRANSPORT=http -p 8084:8084 ozon-mcp
+docker run -d --name marketplace-mcp --shm-size=1g -v /opt/marketplace-mcp:/data \
+  -e OZON_TRANSPORT=http -p 8084:8084 marketplace-mcp
 ```
 
 `/data` has to be a bind mount. It holds the profile, and Ozon rotates the
@@ -268,7 +268,7 @@ Locally, with [uv](https://docs.astral.sh/uv/):
 ```bash
 uv sync
 uv run playwright install --with-deps chromium
-uv run python -m ozon_mcp   # needs a display or Xvfb
+uv run python -m marketplace_mcp   # needs a display or Xvfb
 ```
 
 Under `http` and `sse` the same port serves Prometheus metrics at `/metrics`: upstream

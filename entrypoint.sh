@@ -26,4 +26,4 @@ fi
 
 fluxbox >/tmp/fluxbox.log 2>&1 &
 sleep 1
-exec uv run --no-dev python -m ozon_mcp
+exec uv run --no-dev python -m marketplace_mcp

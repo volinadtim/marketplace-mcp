@@ -6,7 +6,7 @@ of a number, and requiring a number made a freshly created list invisible.
 
 from __future__ import annotations
 
-from ozon_mcp.parsing.lists import parse_list_membership, parse_wishlists
+from marketplace_mcp.parsing.lists import parse_list_membership, parse_wishlists
 
 
 def _cell(name: str, subtitle: str | None, link: str | None, *, member: bool = False) -> str:

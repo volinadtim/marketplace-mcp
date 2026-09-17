@@ -9,8 +9,8 @@ from __future__ import annotations
 
 import pytest
 
-from ozon_mcp.errors import OzonError
-from ozon_mcp.services import selections
+from marketplace_mcp.errors import OzonError
+from marketplace_mcp.services import selections
 from support import FakeSession, page
 
 UUID = "01a05d2c-845c-7190-b203-a347bb6482e5"

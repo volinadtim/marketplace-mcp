@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from ozon_mcp.parsing.catalog import parse_delivery_widget
+from marketplace_mcp.parsing.catalog import parse_delivery_widget
 
 
 def _state() -> dict[str, object]:

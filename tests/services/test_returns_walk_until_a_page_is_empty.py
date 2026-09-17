@@ -5,7 +5,7 @@ Going by the cursor stopped at the first three of thirty-six.
 
 from __future__ import annotations
 
-from ozon_mcp.services import orders
+from marketplace_mcp.services import orders
 from support import FakeSession, page
 
 

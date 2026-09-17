@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ozon_mcp.services import catalog
+from marketplace_mcp.services import catalog
 from support import page
 
 if TYPE_CHECKING:

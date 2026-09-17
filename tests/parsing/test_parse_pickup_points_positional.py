@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from ozon_mcp.parsing.checkout import parse_delivery, parse_pickup_points
+from marketplace_mcp.parsing.checkout import parse_delivery, parse_pickup_points
 
 
 def _entry(title: str, lines: list[str], *, number: str | None, enabled: bool = True) -> dict[str, object]:

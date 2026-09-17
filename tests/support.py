@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ozon_mcp.utils.serde import dumps
+from marketplace_mcp.utils.serde import dumps
 
 
 def page(**widgets: Any) -> dict[str, Any]:

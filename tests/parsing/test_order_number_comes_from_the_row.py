@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 
-from ozon_mcp.parsing.orders import order_numbers_in, parse_orders
+from marketplace_mcp.parsing.orders import order_numbers_in, parse_orders
 
 
 def _product(order: str, posting: str) -> dict[str, object]:

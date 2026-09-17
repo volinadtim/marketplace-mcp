@@ -6,7 +6,7 @@ that was already settled.
 
 from __future__ import annotations
 
-from ozon_mcp.services.orders import _order_exists
+from marketplace_mcp.services.orders import _order_exists
 
 
 def test_a_real_order_page_is_recognised() -> None:

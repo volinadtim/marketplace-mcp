@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from ozon_mcp.parsing.orders import parse_orders
+from marketplace_mcp.parsing.orders import parse_orders
 
 
 def _price(text: str, tag: str | None = None) -> dict[str, Any]:

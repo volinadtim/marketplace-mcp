@@ -15,9 +15,9 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from ozon_mcp.errors import OzonError
-from ozon_mcp.services import catalog
-from ozon_mcp.utils.serde import dumps
+from marketplace_mcp.errors import OzonError
+from marketplace_mcp.services import catalog
+from marketplace_mcp.utils.serde import dumps
 from support import page
 
 if TYPE_CHECKING:

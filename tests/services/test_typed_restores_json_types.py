@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from ozon_mcp.services.orders import _typed
+from marketplace_mcp.services.orders import _typed
 
 
 def test_typed_restores_json_types() -> None:

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from ozon_mcp.services.orders import _postings
+from marketplace_mcp.services.orders import _postings
 
 
 def _modal() -> dict[str, object]:

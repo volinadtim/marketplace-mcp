@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from ozon_mcp.services import catalog, favorites
-from ozon_mcp.utils.serde import dumps
+from marketplace_mcp.services import catalog, favorites
+from marketplace_mcp.utils.serde import dumps
 from support import FakeSession, page
 
 CARD = {

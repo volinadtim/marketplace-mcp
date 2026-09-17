@@ -9,9 +9,9 @@ price.
 
 from __future__ import annotations
 
-from ozon_mcp.parsing.catalog import parse_product
-from ozon_mcp.parsing.common import widget
-from ozon_mcp.utils.serde import dumps
+from marketplace_mcp.parsing.catalog import parse_product
+from marketplace_mcp.parsing.common import widget
+from marketplace_mcp.utils.serde import dumps
 
 PRICE = {"isAvailable": True, "cardPrice": "4 110 ₽", "price": "4 327 ₽", "originalPrice": "12 074 ₽"}
 DECREASED = {"textRs": [{"type": "text", "content": "Стало дешевле"}], "link": "/modal/web_pdp_lower_price"}

@@ -14,11 +14,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ozon_mcp.models.catalog import Purchase
-from ozon_mcp.models.enums import OrderState
-from ozon_mcp.models.orders import Order, OrderDetail, OrderProduct
-from ozon_mcp.store import connect, writes
-from ozon_mcp.store.dedup import ADJACENT, KEPT_APART, LINKED, SKIPPED, link_duplicates, normalise
+from marketplace_mcp.models.catalog import Purchase
+from marketplace_mcp.models.enums import OrderState
+from marketplace_mcp.models.orders import Order, OrderDetail, OrderProduct
+from marketplace_mcp.store import connect, writes
+from marketplace_mcp.store.dedup import ADJACENT, KEPT_APART, LINKED, SKIPPED, link_duplicates, normalise
 
 if TYPE_CHECKING:
     import sqlite3

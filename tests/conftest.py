@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from ozon_mcp.services import (
+from marketplace_mcp.services import (
     cart,
     catalog,
     checkout,
@@ -20,7 +20,7 @@ from ozon_mcp.services import (
     selections,
     session as session_service,
 )
-from ozon_mcp.settings import get_settings
+from marketplace_mcp.settings import get_settings
 from support import FakeSession
 
 _SERVICE_MODULES = (cart, catalog, checkout, favorites, finance, monitoring, orders, selections, session_service)

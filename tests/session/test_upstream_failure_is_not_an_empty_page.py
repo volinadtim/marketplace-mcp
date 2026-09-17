@@ -12,9 +12,9 @@ from typing import Any, override
 
 import pytest
 
-from ozon_mcp.errors import RateLimitedError, UpstreamError
-from ozon_mcp.session.transport import OzonSession
-from ozon_mcp.utils.serde import dumps
+from marketplace_mcp.errors import RateLimitedError, UpstreamError
+from marketplace_mcp.session.transport import OzonSession
+from marketplace_mcp.utils.serde import dumps
 
 
 class _Response:

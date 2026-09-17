@@ -6,8 +6,8 @@ charge different money — so the scope is read, not assumed.
 
 from __future__ import annotations
 
-from ozon_mcp.models.checkout import Totals
-from ozon_mcp.parsing.checkout import parse_pay_after_receipt, state_postpay
+from marketplace_mcp.models.checkout import Totals
+from marketplace_mcp.parsing.checkout import parse_pay_after_receipt, state_postpay
 
 # What the checkout layout declares for the two cases.
 TEXTS = {

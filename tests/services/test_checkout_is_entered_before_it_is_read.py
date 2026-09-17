@@ -13,8 +13,8 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from ozon_mcp.errors import TotalMismatchError
-from ozon_mcp.services import checkout
+from marketplace_mcp.errors import TotalMismatchError
+from marketplace_mcp.services import checkout
 from support import page
 
 if TYPE_CHECKING:

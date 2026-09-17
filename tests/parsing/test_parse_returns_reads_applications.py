@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 
-from ozon_mcp.parsing.returns import parse_returns
+from marketplace_mcp.parsing.returns import parse_returns
 
 NUMBER = "44563249-R37"
 

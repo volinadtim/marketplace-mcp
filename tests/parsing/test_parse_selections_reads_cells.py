@@ -6,7 +6,7 @@ it answers "она удалена" — so a cell without that link is not a sele
 
 from __future__ import annotations
 
-from ozon_mcp.parsing.selections import parse_selections
+from marketplace_mcp.parsing.selections import parse_selections
 
 UUID = "01a05d2c-845c-7190-b203-a347bb6482e5"
 OWNER = "0ad3ae61-5dfb-4064-9d4a-da8fb069b8c6"

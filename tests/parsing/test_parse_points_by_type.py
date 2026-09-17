@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-from ozon_mcp.parsing.finance import parse_points
+from marketplace_mcp.parsing.finance import parse_points
 
 
 def _points() -> dict[str, dict[str, str]]:

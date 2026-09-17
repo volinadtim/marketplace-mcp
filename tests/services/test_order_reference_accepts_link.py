@@ -11,9 +11,9 @@ import json
 
 import pytest
 
-from ozon_mcp.errors import OzonError
-from ozon_mcp.parsing.orders import order_numbers_from_link
-from ozon_mcp.services.orders import resolve_order
+from marketplace_mcp.errors import OzonError
+from marketplace_mcp.parsing.orders import order_numbers_from_link
+from marketplace_mcp.services.orders import resolve_order
 
 
 def _posting_link(*postings: str) -> str:

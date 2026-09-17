@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-from ozon_mcp.parsing.catalog import parse_tiles
+from marketplace_mcp.parsing.catalog import parse_tiles
 
 
 def _grid() -> dict[str, dict[str, str]]:

@@ -4,7 +4,7 @@ structurally rather than by pairing texts in page order.
 
 from __future__ import annotations
 
-from ozon_mcp.parsing.checkout import parse_shipment_items, parse_shipments, shipment_detail_link, shipment_total
+from marketplace_mcp.parsing.checkout import parse_shipment_items, parse_shipments, shipment_detail_link, shipment_total
 
 
 def _page() -> dict[str, object]:

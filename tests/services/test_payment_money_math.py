@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from ozon_mcp.services.orders import _money
-from ozon_mcp.utils.money import to_kopecks
+from marketplace_mcp.services.orders import _money
+from marketplace_mcp.utils.money import to_kopecks
 
 
 @pytest.mark.parametrize(

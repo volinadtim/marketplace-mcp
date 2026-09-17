@@ -7,7 +7,7 @@ the page — so a second priced tile would have quietly replaced the answer.
 
 from __future__ import annotations
 
-from ozon_mcp.parsing.finance import parse_finance
+from marketplace_mcp.parsing.finance import parse_finance
 
 
 def _page(*, extra_card: bool = True) -> dict[str, object]:

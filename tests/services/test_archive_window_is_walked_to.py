@@ -10,8 +10,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from ozon_mcp.services import orders
-from ozon_mcp.utils.serde import dumps
+from marketplace_mcp.services import orders
+from marketplace_mcp.utils.serde import dumps
 from support import page
 
 if TYPE_CHECKING:

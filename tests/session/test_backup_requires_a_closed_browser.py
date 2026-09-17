@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ozon_mcp.session.transport import OzonSession
+from marketplace_mcp.session.transport import OzonSession
 
 if TYPE_CHECKING:
     from pathlib import Path

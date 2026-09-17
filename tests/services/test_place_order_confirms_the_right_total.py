@@ -8,8 +8,8 @@ from __future__ import annotations
 
 import pytest
 
-from ozon_mcp.errors import OrdersDisabledError, TotalMismatchError
-from ozon_mcp.services import checkout
+from marketplace_mcp.errors import OrdersDisabledError, TotalMismatchError
+from marketplace_mcp.services import checkout
 from support import FakeSession, page
 
 TOTAL = {

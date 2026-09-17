@@ -10,8 +10,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from ozon_mcp.services import monitoring
-from ozon_mcp.settings import get_settings
+from marketplace_mcp.services import monitoring
+from marketplace_mcp.settings import get_settings
 
 if TYPE_CHECKING:
     from pathlib import Path

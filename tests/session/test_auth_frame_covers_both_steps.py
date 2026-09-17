@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from ozon_mcp.session.transport import _is_auth_frame
+from marketplace_mcp.session.transport import _is_auth_frame
 
 
 @pytest.mark.parametrize(

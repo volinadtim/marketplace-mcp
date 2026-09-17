@@ -6,9 +6,9 @@ import base64
 
 import pytest
 
-from ozon_mcp.errors import OzonError, WritesDisabledError
-from ozon_mcp.services import orders
-from ozon_mcp.utils.serde import dumps
+from marketplace_mcp.errors import OzonError, WritesDisabledError
+from marketplace_mcp.services import orders
+from marketplace_mcp.utils.serde import dumps
 from support import FakeSession, page
 
 LINK = (

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-from ozon_mcp.parsing.common import widget_with
+from marketplace_mcp.parsing.common import widget_with
 
 
 def _page(first: dict[str, object], second: dict[str, object]) -> dict[str, object]:

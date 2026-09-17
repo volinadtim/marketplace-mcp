@@ -8,7 +8,7 @@ the tag Ozon marks as selected.
 
 from __future__ import annotations
 
-from ozon_mcp.parsing.checkout import parse_delivery
+from marketplace_mcp.parsing.checkout import parse_delivery
 
 
 def _state(mode: str, title: str, subtitle: str) -> dict[str, object]:

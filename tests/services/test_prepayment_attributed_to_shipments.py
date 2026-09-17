@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from ozon_mcp.models.checkout import Checkout, PayAfterReceipt, Shipment
-from ozon_mcp.services.checkout import _attribute_prepayment
+from marketplace_mcp.models.checkout import Checkout, PayAfterReceipt, Shipment
+from marketplace_mcp.services.checkout import _attribute_prepayment
 
 
 def _checkout(prepayment: str, *totals: str) -> Checkout:

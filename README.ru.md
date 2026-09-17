@@ -245,14 +245,14 @@ Ozon.
 ## Запуск
 
 ```bash
-docker build -t ozon-mcp .
+docker build -t marketplace-mcp .
 
 # stdio: клиент подключается к stdin/stdout контейнера
-docker run -i --rm --shm-size=1g -v /opt/ozon-mcp:/data ozon-mcp
+docker run -i --rm --shm-size=1g -v /opt/marketplace-mcp:/data marketplace-mcp
 
 # http: долгоживущий сервис на :8084 (/mcp + /metrics)
-docker run -d --name ozon-mcp --shm-size=1g -v /opt/ozon-mcp:/data \
-  -e OZON_TRANSPORT=http -p 8084:8084 ozon-mcp
+docker run -d --name marketplace-mcp --shm-size=1g -v /opt/marketplace-mcp:/data \
+  -e OZON_TRANSPORT=http -p 8084:8084 marketplace-mcp
 ```
 
 `/data` обязан быть бинд-маунтом. Там лежит профиль, а Ozon постоянно ротирует
@@ -269,7 +269,7 @@ docker run -d --name ozon-mcp --shm-size=1g -v /opt/ozon-mcp:/data \
 ```bash
 uv sync
 uv run playwright install --with-deps chromium
-uv run python -m ozon_mcp   # нужен дисплей или Xvfb
+uv run python -m marketplace_mcp   # нужен дисплей или Xvfb
 ```
 
 Под `http` и `sse` тот же порт отдаёт Prometheus-метрики на `/metrics`: исходы и
