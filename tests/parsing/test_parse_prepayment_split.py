@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from marketplace_mcp.parsing.checkout import parse_prepayment_split, prepayment_link
+from marketplace_mcp.adapters.ozon.parsing.checkout import parse_prepayment_split, prepayment_link
 
 
 def _section(title: str, *lines: tuple[str, str]) -> str:

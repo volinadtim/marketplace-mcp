@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import pytest
 
-from marketplace_mcp.errors import OzonError
-from marketplace_mcp.models.checkout import PaymentOption
-from marketplace_mcp.services.checkout import _match_payment_option
+from marketplace_mcp.adapters.ozon.models.checkout import PaymentOption
+from marketplace_mcp.adapters.ozon.services.checkout import _match_payment_option
+from marketplace_mcp.core.errors import OzonError
 
 OPTIONS = [
     PaymentOption(payment_type=1626, kind="FastPaymentSystem"),

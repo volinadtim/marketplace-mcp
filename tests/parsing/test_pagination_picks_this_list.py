@@ -10,7 +10,12 @@ from __future__ import annotations
 
 import json
 
-from marketplace_mcp.parsing.common import continues_this_list, declared_count, declared_counter, next_pages
+from marketplace_mcp.adapters.ozon.parsing.common import (
+    continues_this_list,
+    declared_count,
+    declared_counter,
+    next_pages,
+)
 
 FAVORITES_OWN = "/my/favorites?layout_container=default&layout_page_index=2&page=112623456"
 FAVORITES_RECOMS = "/my/favorites?layout_container=recoms_pagination_favorites_web&layout_page_index=2"

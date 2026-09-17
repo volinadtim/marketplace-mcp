@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from marketplace_mcp.parsing.checkout import parse_totals
+from marketplace_mcp.adapters.ozon.parsing.checkout import parse_totals
 
 
 def test_parse_totals_strips_markup() -> None:

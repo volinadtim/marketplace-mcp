@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from marketplace_mcp.models.finance import SellerBonus
+from marketplace_mcp.adapters.ozon.models.finance import SellerBonus
 
 
 def test_seller_bonus_amount_accepts_numbers() -> None:

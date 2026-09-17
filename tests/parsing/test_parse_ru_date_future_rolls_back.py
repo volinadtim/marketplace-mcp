@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import datetime
 
-from marketplace_mcp.parsing.orders import parse_ru_date
+from marketplace_mcp.adapters.ozon.parsing.orders import parse_ru_date
 
 
 def test_parse_ru_date_future_rolls_back() -> None:

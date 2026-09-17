@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from marketplace_mcp.services import (
+from marketplace_mcp.adapters.ozon.services import (
     cart,
     catalog,
     checkout,

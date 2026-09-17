@@ -9,7 +9,7 @@ import datetime
 import json
 from typing import Any
 
-from marketplace_mcp.parsing.orders import parse_orders
+from marketplace_mcp.adapters.ozon.parsing.orders import parse_orders
 
 
 def _item(*, badge: str | None = None, price: str = "2 534 ₽", quantity: str | None = None) -> dict[str, Any]:

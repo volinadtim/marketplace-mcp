@@ -9,10 +9,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from marketplace_mcp.models.catalog import Purchase
-from marketplace_mcp.models.enums import OrderState
-from marketplace_mcp.models.orders import Delivery, Order, OrderDetail, OrderProduct
-from marketplace_mcp.store import connect, writes
+from marketplace_mcp.adapters.ozon.models.catalog import Purchase
+from marketplace_mcp.adapters.ozon.models.enums import OrderState
+from marketplace_mcp.adapters.ozon.models.orders import Delivery, Order, OrderDetail, OrderProduct
+from marketplace_mcp.core.store import connect, writes
 
 if TYPE_CHECKING:
     import sqlite3

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 
-from marketplace_mcp.parsing.orders import parse_order_products
+from marketplace_mcp.adapters.ozon.parsing.orders import parse_order_products
 
 
 def _page() -> dict[str, object]:

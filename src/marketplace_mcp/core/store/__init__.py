@@ -1,0 +1,5 @@
+"""A local copy of the account: what was bought, where it went, what it cost."""
+
+from marketplace_mcp.core.store.schema import SCHEMA_VERSION, connect
+
+__all__ = ["SCHEMA_VERSION", "connect"]

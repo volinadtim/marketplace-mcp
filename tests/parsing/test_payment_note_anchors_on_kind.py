@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from marketplace_mcp.parsing.checkout import payment_note
+from marketplace_mcp.adapters.ozon.parsing.checkout import payment_note
 
 
 def _payments() -> dict[str, object]:

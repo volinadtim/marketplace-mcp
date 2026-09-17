@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import json
 
-from marketplace_mcp.parsing.catalog import parse_description
-from marketplace_mcp.parsing.common import state_by_layout
+from marketplace_mcp.adapters.ozon.parsing.catalog import parse_description
+from marketplace_mcp.adapters.ozon.parsing.common import state_by_layout
 
 
 def _page() -> dict[str, object]:

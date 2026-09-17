@@ -1,6 +1,6 @@
 """An error's code is what a caller branches on; its text is what a person reads."""
 
-from marketplace_mcp.errors import (
+from marketplace_mcp.core.errors import (
     ErrorCode,
     OrdersDisabledError,
     OzonError,

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-from marketplace_mcp.parsing.checkout import parse_checkout
+from marketplace_mcp.adapters.ozon.parsing.checkout import parse_checkout
 
 
 def test_parse_checkout_reports_empty_selection() -> None:

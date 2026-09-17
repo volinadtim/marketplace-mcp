@@ -9,9 +9,9 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING, Any
 
-from marketplace_mcp.models.enums import OrderState
-from marketplace_mcp.parsing.orders import parse_orders
-from marketplace_mcp.services import orders as service
+from marketplace_mcp.adapters.ozon.models.enums import OrderState
+from marketplace_mcp.adapters.ozon.parsing.orders import parse_orders
+from marketplace_mcp.adapters.ozon.services import orders as service
 
 if TYPE_CHECKING:
     from support import FakeSession

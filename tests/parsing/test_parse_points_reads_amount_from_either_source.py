@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from marketplace_mcp.parsing.checkout import parse_points
+from marketplace_mcp.adapters.ozon.parsing.checkout import parse_points
 
 
 def _widget(link: str | None, label: str) -> dict[str, object]:

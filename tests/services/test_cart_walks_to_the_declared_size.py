@@ -9,9 +9,9 @@ from __future__ import annotations
 
 import pytest
 
-from marketplace_mcp.errors import WritesDisabledError
-from marketplace_mcp.services import cart
-from marketplace_mcp.utils.serde import dumps
+from marketplace_mcp.adapters.ozon.services import cart
+from marketplace_mcp.core.errors import WritesDisabledError
+from marketplace_mcp.core.utils.serde import dumps
 from support import FakeSession, page
 
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-from marketplace_mcp.parsing.catalog import parse_description
+from marketplace_mcp.adapters.ozon.parsing.catalog import parse_description
 
 
 def _page(state: dict[str, object]) -> dict[str, object]:

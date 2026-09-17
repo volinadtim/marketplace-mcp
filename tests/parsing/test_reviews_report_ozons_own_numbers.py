@@ -11,7 +11,7 @@ from typing import Any
 
 import pytest
 
-from marketplace_mcp.parsing.catalog import parse_reviews, reviews_next_page
+from marketplace_mcp.adapters.ozon.parsing.catalog import parse_reviews, reviews_next_page
 from support import page
 
 SCORE = {

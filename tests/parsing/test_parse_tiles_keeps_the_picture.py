@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 
-from marketplace_mcp.parsing.catalog import parse_tiles
+from marketplace_mcp.adapters.ozon.parsing.catalog import parse_tiles
 
 COVER = "https://ir.ozone.ru/s3/multimedia-1-4/9721855912.jpg"
 SECOND = "https://ir.ozone.ru/s3/multimedia-1-t/8058369017.jpg"

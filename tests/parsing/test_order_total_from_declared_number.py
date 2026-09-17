@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from marketplace_mcp.parsing.checkout import parse_totals
+from marketplace_mcp.adapters.ozon.parsing.checkout import parse_totals
 
 
 def _total(*, caption: str | None, number: float | None) -> dict[str, object]:

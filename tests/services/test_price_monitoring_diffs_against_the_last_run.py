@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from marketplace_mcp.services import monitoring
+from marketplace_mcp.adapters.ozon.services import monitoring
 from marketplace_mcp.settings import get_settings
 
 if TYPE_CHECKING:

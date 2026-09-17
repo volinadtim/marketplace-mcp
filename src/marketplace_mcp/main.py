@@ -9,8 +9,18 @@ from typing import Final
 
 from mcp.server.fastmcp import FastMCP
 
+from marketplace_mcp.adapters.ozon.tools import (
+    cart,
+    catalog,
+    checkout,
+    favorites,
+    finance,
+    orders,
+    selections,
+    session,
+    store,
+)
 from marketplace_mcp.mcp_server import mcp as _server
-from marketplace_mcp.tools import cart, catalog, checkout, favorites, finance, orders, selections, session, store
 
 # Naming the modules keeps the registration visible instead of leaving it to a
 # side effect nobody can see.

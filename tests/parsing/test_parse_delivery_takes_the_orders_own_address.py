@@ -7,8 +7,8 @@ instead gives a whole purchase history one address, and it looks right.
 
 from __future__ import annotations
 
-from marketplace_mcp.parsing.orders import parse_delivery, parse_order_detail
-from marketplace_mcp.utils.serde import dumps
+from marketplace_mcp.adapters.ozon.parsing.orders import parse_delivery, parse_order_detail
+from marketplace_mcp.core.utils.serde import dumps
 from support import page
 
 PICKUP = "Пункт Ozon, Россия, Санкт-Петербург, Малый проспект Васильевского острова, 17"

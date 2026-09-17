@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from marketplace_mcp.services import selections
+from marketplace_mcp.adapters.ozon.services import selections
 from support import page
 
 if TYPE_CHECKING:

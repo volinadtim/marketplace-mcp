@@ -12,9 +12,9 @@ import logging
 import uvicorn
 from starlette.routing import Route
 
+from marketplace_mcp.core.utils.observability import METRICS_PATH, metrics_endpoint
 from marketplace_mcp.main import mcp
 from marketplace_mcp.settings import get_settings
-from marketplace_mcp.utils.observability import METRICS_PATH, metrics_endpoint
 
 logger = logging.getLogger("marketplace_mcp")
 

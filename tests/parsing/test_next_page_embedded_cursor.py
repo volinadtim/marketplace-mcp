@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from marketplace_mcp.parsing.common import next_page
+from marketplace_mcp.adapters.ozon.parsing.common import next_page
 
 
 def test_next_page_embedded_cursor() -> None:

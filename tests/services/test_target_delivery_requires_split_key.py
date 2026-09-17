@@ -9,9 +9,9 @@ from __future__ import annotations
 
 import pytest
 
-from marketplace_mcp.errors import OzonError
-from marketplace_mcp.models.checkout import Checkout, Delivery
-from marketplace_mcp.services.checkout import _target_delivery
+from marketplace_mcp.adapters.ozon.models.checkout import Checkout, Delivery
+from marketplace_mcp.adapters.ozon.services.checkout import _target_delivery
+from marketplace_mcp.core.errors import OzonError
 
 
 def _checkout(*deliveries: Delivery) -> Checkout:
