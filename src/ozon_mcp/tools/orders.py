@@ -7,7 +7,7 @@ from pydantic import Field
 from ozon_mcp.dependencies import run_blocking
 from ozon_mcp.mcp_server import mcp
 from ozon_mcp.models.catalog import BoughtItems, Purchase
-from ozon_mcp.models.orders import Order, OrderProduct, Return
+from ozon_mcp.models.orders import Order, OrderDetail, OrderProduct, Return
 from ozon_mcp.services import catalog, orders
 from ozon_mcp.utils.annotations import IsoDate, Limit, OrderRef, OrderScope, PurchaseSort
 
@@ -51,6 +51,25 @@ async def order_products(order: OrderRef) -> list[OrderProduct]:
     list_orders()[].detail_link.
     """
     return await run_blocking(lambda: catalog.order_products(order))
+
+
+@mcp.tool()
+async def order_parcels(order: OrderRef) -> list[OrderDetail]:
+    """Parcels of one order: where each went, the order total and how it was
+    paid, plus the same items order_products() gives.
+    `delivery.address` is the pickup point or street address this parcel went
+    to, and `delivery.kind` Ozon's line above it («Доставка в пункт выдачи»,
+    «Доставка курьером»). It is stated per parcel, not per order: an order split
+    in four can have gone to four different places.
+    `paid_total` and `payment_method` are the order's and repeat on every parcel
+    of it; `status` is this parcel's own outcome.
+    Costs a request per parcel, so it is the expensive way to read an order —
+    use order_products() when only the items matter, and list_orders() when only
+    the status does.
+    Accepts an order number ("44563249-0865") or a detail_link from
+    list_orders()[].detail_link.
+    """
+    return await run_blocking(lambda: orders.order_parcels(order))
 
 
 @mcp.tool()

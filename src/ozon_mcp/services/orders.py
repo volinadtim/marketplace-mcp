@@ -8,9 +8,14 @@ from ozon_mcp.dependencies import get_session
 from ozon_mcp.errors import OzonError, WritesDisabledError
 from ozon_mcp.models.checkout import CancelReason, OrderCancelled, PaymentRequested
 from ozon_mcp.models.enums import OrderState
-from ozon_mcp.models.orders import Order, Return
-from ozon_mcp.parsing.common import find_all, walk, widget
-from ozon_mcp.parsing.orders import ORDER_NUMBER_RE, order_numbers_from_link, parse_orders
+from ozon_mcp.models.orders import Order, OrderDetail, Return
+from ozon_mcp.parsing.common import find_all, walk, widget, widgets_all
+from ozon_mcp.parsing.orders import (
+    ORDER_NUMBER_RE,
+    order_numbers_from_link,
+    parse_order_detail,
+    parse_orders,
+)
 from ozon_mcp.parsing.returns import parse_returns
 from ozon_mcp.settings import get_settings
 from ozon_mcp.utils.money import format_money, to_kopecks
@@ -560,3 +565,40 @@ def _payment_url(response: dict[str, Any]) -> str | None:
     data = response.get("data") or {}
     url = data.get("link") or ((data.get("action") or {}).get("link"))
     return str(url) if url else None
+
+
+def order_parcels(order: str) -> list[OrderDetail]:
+    """Every parcel of an order, each with where it went and what was in it.
+
+    A parcel at a time because that is the only way Ozon states an address: the
+    order page describes the order, and an order split in four went to four
+    places — to a pickup point, or to a street address, per parcel. So the order
+    page is read once for the list of parcels, and then each parcel's own page
+    is opened.
+
+    That makes this the expensive call in the library — a request per parcel,
+    not per order — and it is why the cheaper order_products() still exists for
+    callers that only want to know what was bought.
+    """
+    order = resolve_order(order)
+    session = get_session()
+    page = session.fetch(f"/my/orderdetails/?order={order}")
+    if not _order_exists(page):
+        msg = f"there is no order {order} on this account — check the number against list_orders()"
+        raise OzonError(msg)
+
+    parcels = [
+        str(state["shipmentId"])
+        for state in widgets_all(page, "shipmentWidget")
+        if isinstance(state, dict) and state.get("shipmentId")
+    ]
+    if not parcels:
+        # An order with nothing to ship still has a page worth reading — it
+        # carries the total and what was ordered.
+        return [parse_order_detail(page, order_number=order)]
+
+    details: list[OrderDetail] = []
+    for shipment in dict.fromkeys(parcels):
+        detail = session.fetch(f"/my/orderdetails/?order={order}&postingId={shipment}")
+        details.append(parse_order_detail(detail, order_number=order, shipment=shipment))
+    return details

@@ -6,7 +6,7 @@ import re
 from typing import Any, Final
 
 from ozon_mcp.models.enums import OrderState
-from ozon_mcp.models.orders import Order, OrderLine, OrderProduct
+from ozon_mcp.models.orders import Delivery, Order, OrderDetail, OrderLine, OrderProduct
 from ozon_mcp.parsing.common import find_all, walk, widget, widgets_all
 from ozon_mcp.utils.serde import loads
 
@@ -307,3 +307,88 @@ def _received(status: str | None) -> bool | None:
     if status.startswith(_RECEIVED_STATUS):
         return True
     return False if status.startswith(_CANCELLED_STATUS) else None
+
+
+# The order page tags its delivery block, and the line inside it that names the
+# kind of delivery; the address is the sentence under that line.
+_ADDRESS_WIDGET_TAG: Final = "details-address"
+_ADDRESS_KIND_TAG: Final = "addressDetails"
+_TOTAL_PRICE_TAG: Final = "total-price"
+_TOTAL_METHOD_TAG: Final = "total-subtitle"
+
+
+def parse_delivery(data: dict[str, Any]) -> Delivery | None:
+    """Where this parcel went, from the block the page tags as its address.
+
+    The page carries two addresses and only one of them belongs to the order.
+    The other is the site header's address picker — whichever address is
+    currently selected for *new* orders — and it is byte-identical on every
+    order page, so a search for something address-shaped answers with it and
+    every order in a history comes back delivered to the same place. Selecting
+    the tagged block is what tells them apart.
+
+    A parcel states an address only when a parcel is named: the order page on
+    its own describes an order that may have gone to four different places.
+    """
+    for state in widgets_all(data, "orderDetailsItem"):
+        if _tagged(state, _ADDRESS_WIDGET_TAG) is None:
+            continue
+        cell = state.get("cell") if isinstance(state, dict) else None
+        if not isinstance(cell, dict):
+            continue
+        address = _atom(cell.get("subtitle"))
+        if not address:
+            continue
+        return Delivery(kind=_tagged_text(cell, _ADDRESS_KIND_TAG) or _atom(cell.get("title")), address=address)
+    return None
+
+
+def _shipment_widget(data: dict[str, Any], shipment: str | None) -> dict[str, Any]:
+    """The named parcel's own widget, or the first one if none was named.
+
+    Asking for one parcel does not get a page about one parcel: Ozon serves the
+    whole order and highlights the one asked for, so every parcel's widget is
+    there. Taking whichever came first gave the answer another parcel's status,
+    and which parcel that was changed between requests.
+    """
+    states = [state for state in widgets_all(data, "shipmentWidget") if isinstance(state, dict)]
+    if shipment:
+        named = next((state for state in states if str(state.get("shipmentId")) == str(shipment)), None)
+        if named is not None:
+            return named
+    return states[0] if states else {}
+
+
+def parse_order_detail(
+    data: dict[str, Any],
+    order_number: str | None = None,
+    shipment: str | None = None,
+) -> OrderDetail:
+    """A parcel's page: where it went, how the order was paid, what was in it.
+
+    The total and the payment method belong to the order, not to this parcel —
+    Ozon states them once per order however many parcels it was split into — and
+    they are reported as rendered rather than summed from the items, which would
+    miss delivery and discounts.
+
+    The items are this parcel's, filtered by the parcel they travelled in. The
+    page lists every parcel of the order, so an unfiltered read hands each
+    parcel of a four-parcel order all fifteen items and the order looks like it
+    was delivered four times over.
+    """
+    parcel = _shipment_widget(data, shipment)
+    total = (widget(data, "orderDoneTotal") or {}).get("total") or {}
+    shipment_id = parcel.get("shipmentId")
+    shipment_id = str(shipment_id) if shipment_id else None
+    products = parse_order_products(data, order_number)
+    if shipment_id:
+        products = [product for product in products if product.shipment_id == shipment_id]
+    return OrderDetail(
+        order_number=order_number,
+        shipment_id=shipment_id,
+        status=_tagged_text(parcel.get("header") or [], _SHIPMENT_STATUS_TAG) if parcel else None,
+        delivery=parse_delivery(data),
+        paid_total=_tagged_text(total, _TOTAL_PRICE_TAG),
+        payment_method=_tagged_text(total, _TOTAL_METHOD_TAG),
+        products=products,
+    )

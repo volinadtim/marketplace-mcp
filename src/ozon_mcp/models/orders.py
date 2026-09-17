@@ -120,3 +120,39 @@ class Return(OzonModel):
     amount: str | None = None
     products: list[ReturnProduct] = Field(default_factory=list)
     link: str | None = None
+
+
+class Delivery(OzonModel):
+    """Where a parcel was sent, as the order's own page states it.
+
+    Not to be confused with the address in the site header, which is the one
+    currently selected for new orders and is identical on every order page —
+    reading that would give every order in a history the same wrong address.
+    """
+
+    kind: str | None = Field(
+        default=None, description='Ozon\'s own line: "Доставка в пункт выдачи", "Доставка курьером".'
+    )
+    address: str | None = Field(
+        default=None,
+        description="The pickup point or street address the parcel went to, as one line.",
+    )
+
+
+class OrderDetail(OzonModel):
+    """One parcel of an order: where it went, what it cost, what was in it.
+
+    A parcel, not an order, because that is the unit Ozon states an address
+    for: an order split across four parcels has four addresses, and the order
+    page without a parcel named answers for none of them.
+    """
+
+    order_number: str | None = None
+    shipment_id: str | None = Field(default=None, description="The parcel this answers for.")
+    status: str | None = Field(default=None, description='Ozon\'s word for it: "Получен", "Отменён", "В пути".')
+    delivery: Delivery | None = None
+    paid_total: str | None = Field(
+        default=None, description="What the order cost in total, as Ozon renders it — the order's, not the parcel's."
+    )
+    payment_method: str | None = Field(default=None, description='How it was paid, e.g. "Ozon Банк".')
+    products: list[OrderProduct] = Field(default_factory=list)
