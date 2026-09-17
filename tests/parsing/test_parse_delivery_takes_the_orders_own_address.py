@@ -46,6 +46,24 @@ def test_the_recipient_block_is_not_an_address() -> None:
     assert parse_delivery(page(orderDetailsItem=_recipient_widget())) is None
 
 
+def test_the_blocks_are_told_apart_by_tag_not_by_order() -> None:
+    """Ozon serves address-then-recipient on one parcel and the reverse on the
+    next, so reading them by position swaps them on half a history."""
+    from ozon_mcp.utils.serde import dumps
+
+    for first, second in (
+        (_recipient_widget(), _address_widget("Доставка курьером", PICKUP)),
+        (_address_widget("Доставка курьером", PICKUP), _recipient_widget()),
+    ):
+        data = page()
+        data["widgetStates"]["orderDetailsItem-1-default-1"] = dumps(first)
+        data["widgetStates"]["orderDetailsItem-1-default-1-2"] = dumps(second)
+        detail = parse_order_detail(data)
+        assert detail.delivery is not None
+        assert detail.delivery.address == PICKUP
+        assert detail.recipient == "Кто-то, +7 000 000 00 00"
+
+
 def test_a_page_without_a_parcel_states_no_address() -> None:
     assert parse_delivery(page(orderDoneTotal={})) is None
 

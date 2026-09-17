@@ -151,6 +151,10 @@ class OrderDetail(OzonModel):
     shipment_id: str | None = Field(default=None, description="The parcel this answers for.")
     status: str | None = Field(default=None, description='Ozon\'s word for it: "Получен", "Отменён", "В пути".')
     delivery: Delivery | None = None
+    recipient: str | None = Field(
+        default=None,
+        description="Who the parcel was addressed to, name and phone, as Ozon renders them on one line.",
+    )
     paid_total: str | None = Field(
         default=None, description="What the order cost in total, as Ozon renders it — the order's, not the parcel's."
     )

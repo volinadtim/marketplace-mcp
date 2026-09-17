@@ -62,7 +62,8 @@ async def order_parcels(order: OrderRef) -> list[OrderDetail]:
     «Доставка курьером»). It is stated per parcel, not per order: an order split
     in four can have gone to four different places.
     `paid_total` and `payment_method` are the order's and repeat on every parcel
-    of it; `status` is this parcel's own outcome.
+    of it; `status` is this parcel's own outcome, and `recipient` the name and
+    phone it was addressed to.
     Costs a request per parcel, so it is the expensive way to read an order —
     use order_products() when only the items matter, and list_orders() when only
     the status does.

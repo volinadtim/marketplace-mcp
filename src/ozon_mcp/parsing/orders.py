@@ -313,6 +313,7 @@ def _received(status: str | None) -> bool | None:
 # kind of delivery; the address is the sentence under that line.
 _ADDRESS_WIDGET_TAG: Final = "details-address"
 _ADDRESS_KIND_TAG: Final = "addressDetails"
+_RECIPIENT_WIDGET_TAG: Final = "details-recipient"
 _TOTAL_PRICE_TAG: Final = "total-price"
 _TOTAL_METHOD_TAG: Final = "total-subtitle"
 
@@ -330,16 +331,28 @@ def parse_delivery(data: dict[str, Any]) -> Delivery | None:
     A parcel states an address only when a parcel is named: the order page on
     its own describes an order that may have gone to four different places.
     """
+    cell = _detail_cell(data, _ADDRESS_WIDGET_TAG)
+    if cell is None:
+        return None
+    address = _atom(cell.get("subtitle"))
+    if not address:
+        return None
+    return Delivery(kind=_tagged_text(cell, _ADDRESS_KIND_TAG) or _atom(cell.get("title")), address=address)
+
+
+def _detail_cell(data: dict[str, Any], tag: str) -> dict[str, Any] | None:
+    """The cell of the order-detail block Ozon tagged with ``tag``.
+
+    The blocks are separate widgets of one name and their order is not stable —
+    the same order serves address-then-recipient on one parcel and the reverse
+    on the next — so they are told apart by their tag and never by position.
+    """
     for state in widgets_all(data, "orderDetailsItem"):
-        if _tagged(state, _ADDRESS_WIDGET_TAG) is None:
+        if not isinstance(state, dict) or _tagged(state, tag) is None:
             continue
-        cell = state.get("cell") if isinstance(state, dict) else None
-        if not isinstance(cell, dict):
-            continue
-        address = _atom(cell.get("subtitle"))
-        if not address:
-            continue
-        return Delivery(kind=_tagged_text(cell, _ADDRESS_KIND_TAG) or _atom(cell.get("title")), address=address)
+        cell = state.get("cell")
+        if isinstance(cell, dict):
+            return cell
     return None
 
 
@@ -388,6 +401,7 @@ def parse_order_detail(
         shipment_id=shipment_id,
         status=_tagged_text(parcel.get("header") or [], _SHIPMENT_STATUS_TAG) if parcel else None,
         delivery=parse_delivery(data),
+        recipient=_atom((_detail_cell(data, _RECIPIENT_WIDGET_TAG) or {}).get("subtitle")),
         paid_total=_tagged_text(total, _TOTAL_PRICE_TAG),
         payment_method=_tagged_text(total, _TOTAL_METHOD_TAG),
         products=products,
