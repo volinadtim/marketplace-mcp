@@ -13,7 +13,7 @@ import pytest
 
 from marketplace_mcp.adapters.ozon.parsing.orders import order_numbers_from_link
 from marketplace_mcp.adapters.ozon.services.orders import resolve_order
-from marketplace_mcp.core.errors import OzonError
+from marketplace_mcp.core.errors import MarketplaceError
 
 
 def _posting_link(*postings: str) -> str:
@@ -38,6 +38,6 @@ def test_a_split_order_resolves_to_its_first_number() -> None:
 
 
 def test_something_that_is_neither_says_what_to_pass() -> None:
-    with pytest.raises(OzonError) as raised:
+    with pytest.raises(MarketplaceError) as raised:
         resolve_order("вчерашний заказ")
     assert "list_orders()" in str(raised.value)

@@ -2,8 +2,8 @@
 
 from marketplace_mcp.core.errors import (
     ErrorCode,
+    MarketplaceError,
     OrdersDisabledError,
-    OzonError,
     RateLimitedError,
     SessionExpiredError,
     TotalMismatchError,
@@ -13,7 +13,7 @@ from marketplace_mcp.core.errors import (
 
 
 def test_every_error_names_itself() -> None:
-    assert OzonError("что-то").code is ErrorCode.OZON
+    assert MarketplaceError("что-то").code is ErrorCode.OZON
     assert UpstreamError(502).code is ErrorCode.UPSTREAM
     assert RateLimitedError(3.0).code is ErrorCode.RATE_LIMITED
     assert WritesDisabledError().code is ErrorCode.WRITES_DISABLED

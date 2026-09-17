@@ -27,7 +27,7 @@ from marketplace_mcp.adapters.ozon.models.lists import Selection
 from marketplace_mcp.adapters.ozon.parsing.catalog import parse_tiles
 from marketplace_mcp.adapters.ozon.parsing.common import widget
 from marketplace_mcp.adapters.ozon.parsing.selections import parse_selections
-from marketplace_mcp.core.errors import OzonError, WritesDisabledError
+from marketplace_mcp.core.errors import MarketplaceError, WritesDisabledError
 from marketplace_mcp.core.utils.serde import dumps
 from marketplace_mcp.settings import get_settings
 
@@ -115,7 +115,7 @@ def _find(uuid: str) -> Selection:
         if selection.uuid == uuid:
             return selection
     msg = f"no selection {uuid} in this account"
-    raise OzonError(msg)
+    raise MarketplaceError(msg)
 
 
 def selection_products(uuid: str) -> list[Tile]:
@@ -132,7 +132,7 @@ def selection_products(uuid: str) -> list[Tile]:
     start = _START_PAGE_RE.search(dumps(shell))
     if start is None:
         msg = f"Ozon served the page of selection {uuid} without a page id, so its products cannot be requested"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
     products: list[Tile] = []
     seen: set[str] = set()
     for index in range(_FIRST_ITEMS_PAGE, _FIRST_ITEMS_PAGE + _MAX_ITEMS_PAGES):
@@ -173,7 +173,7 @@ def create_selection(name: str, sku: str, description: str = "", *, public: bool
     uuid = response.get("selectionUuid") if isinstance(response, dict) else None
     if said or not uuid:
         msg = f"Ozon refused to create the selection: {said or 'no uuid came back'}"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
     owner = _UID_RE.search(str((response.get("action") or {}).get("link") or ""))
     owner_id = owner.group(1) if owner else None
     return Selection(
@@ -219,7 +219,7 @@ def edit_selection(uuid: str, name: str, description: str | None = None) -> Sele
     said = _complaint(response)
     if said:
         msg = f"Ozon refused to edit the selection: {said}"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
     return get_selection(str(uuid))
 
 
@@ -244,7 +244,7 @@ def set_selection_items(uuid: str, skus: list[str]) -> Selection:
     said = _complaint(response)
     if said:
         msg = f"Ozon refused to change the selection's products: {said}"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
     return _find(str(uuid))
 
 
@@ -276,7 +276,7 @@ def remove_from_selection(uuid: str, skus: list[str]) -> Selection:
     remaining = [sku for sku in current if sku not in unwanted]
     if len(remaining) == len(current):
         msg = f"selection {uuid} holds none of {', '.join(sorted(unwanted))}"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
     return set_selection_items(uuid, remaining)
 
 
@@ -297,7 +297,7 @@ def set_selection_public(uuid: str, *, public: bool) -> Selection:
     said = _complaint(response)
     if said:
         msg = f"Ozon refused to change the selection's visibility: {said}"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
     return get_selection(str(uuid))
 
 

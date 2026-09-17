@@ -6,7 +6,7 @@ import pytest
 
 from marketplace_mcp.adapters.ozon.models.checkout import PaymentOption
 from marketplace_mcp.adapters.ozon.services.checkout import _match_payment_option
-from marketplace_mcp.core.errors import OzonError
+from marketplace_mcp.core.errors import MarketplaceError
 
 OPTIONS = [
     PaymentOption(payment_type=1626, kind="FastPaymentSystem"),
@@ -34,5 +34,5 @@ def test_match_payment_accepts_words_and_cards(wanted: str, expected: int) -> No
 
 
 def test_match_payment_reports_options_when_unknown() -> None:
-    with pytest.raises(OzonError, match="available:"):
+    with pytest.raises(MarketplaceError, match="available:"):
         _match_payment_option(OPTIONS, "биткоин")

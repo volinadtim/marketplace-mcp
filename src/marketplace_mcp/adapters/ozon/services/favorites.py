@@ -19,7 +19,7 @@ from marketplace_mcp.adapters.ozon.parsing import catalog as catalog_parse
 from marketplace_mcp.adapters.ozon.parsing.common import find_all
 from marketplace_mcp.adapters.ozon.parsing.lists import parse_list_membership, parse_wishlists
 from marketplace_mcp.adapters.ozon.services import monitoring
-from marketplace_mcp.core.errors import OzonError, WritesDisabledError
+from marketplace_mcp.core.errors import MarketplaceError, WritesDisabledError
 from marketplace_mcp.settings import get_settings
 
 # Ozon reports neither success nor refusal for these actions, so the honest
@@ -100,7 +100,7 @@ def create_list(name: str) -> ListRef:
     complaint = response.get("errorForUser") or response.get("error") if isinstance(response, dict) else None
     if complaint or not isinstance(response, dict) or not response.get("id"):
         msg = f"Ozon refused to create the list: {complaint or 'no id came back'}"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
     return ListRef(
         name=str(response.get("title") or name), kind=ListKind.WISHLIST, items=0, list_id=int(response["id"])
     )

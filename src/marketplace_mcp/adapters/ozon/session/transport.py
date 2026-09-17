@@ -41,7 +41,7 @@ from marketplace_mcp.adapters.ozon.constants import (
     LAUNCH_ARGS,
     WIDGET_URL,
 )
-from marketplace_mcp.core.errors import OzonError, RateLimitedError, SessionExpiredError, UpstreamError
+from marketplace_mcp.core.errors import MarketplaceError, RateLimitedError, SessionExpiredError, UpstreamError
 from marketplace_mcp.core.utils.observability import (
     BROWSER_ACTIVE,
     SESSION_BOOTSTRAPS,
@@ -512,7 +512,7 @@ class OzonSession:
                 return frame
             self._page.wait_for_timeout(1000)
         msg = "OzonID login frame never appeared"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
 
     def begin_login(self, login: str) -> str:
         """Open the login form and ask Ozon to send a one-time code.
@@ -563,7 +563,7 @@ class OzonSession:
         # refusal are worth relaying — the rest is the account's own identifier.
         lines = [line.strip() for line in said.splitlines() if line.strip() and "@" not in line]
         msg = "Ozon did not move on to the code step: " + (" | ".join(lines[:6]) or "the login form said nothing")
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
 
     def complete_login(self, code: str) -> bool:
         """Type the one-time code and report whether the account is signed in.

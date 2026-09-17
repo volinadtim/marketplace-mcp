@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from marketplace_mcp.adapters.ozon.services import selections
-from marketplace_mcp.core.errors import OzonError
+from marketplace_mcp.core.errors import MarketplaceError
 from support import page
 
 if TYPE_CHECKING:
@@ -56,6 +56,6 @@ def test_a_uuid_that_was_never_there_is_not_a_deletion(session: FakeSession, wri
     """Absence from the list proves nothing when it was never there."""
     session.pages = {"/selections/list": EMPTY}
     session.actions = {"deleteSelection": {"notificationBar": {"title": "Не смогли удалить подборку"}}}
-    with pytest.raises(OzonError, match="no selection"):
+    with pytest.raises(MarketplaceError, match="no selection"):
         selections.delete_selection(UUID)
     assert session.performed == []

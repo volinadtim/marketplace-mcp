@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Any
 import pytest
 
 from marketplace_mcp.adapters.ozon.services import catalog
-from marketplace_mcp.core.errors import OzonError
+from marketplace_mcp.core.errors import MarketplaceError
 from marketplace_mcp.core.utils.serde import dumps
 from support import page
 
@@ -105,7 +105,7 @@ def test_search_results_are_merged_and_ranked_together(session: FakeSession) -> 
 
 def test_an_unreadable_base_price_fails_instead_of_saying_nothing_is_cheaper(session: FakeSession) -> None:
     _wired(session, price=None)
-    with pytest.raises(OzonError, match="could not read the price"):
+    with pytest.raises(MarketplaceError, match="could not read the price"):
         catalog.find_cheaper(BASE_SKU)
 
 

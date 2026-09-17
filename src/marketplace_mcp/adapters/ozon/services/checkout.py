@@ -32,7 +32,7 @@ from marketplace_mcp.adapters.ozon.parsing.checkout import (
     shipment_total,
 )
 from marketplace_mcp.adapters.ozon.parsing.common import widget
-from marketplace_mcp.core.errors import OrdersDisabledError, OzonError, TotalMismatchError
+from marketplace_mcp.core.errors import MarketplaceError, OrdersDisabledError, TotalMismatchError
 from marketplace_mcp.core.utils.money import to_kopecks
 from marketplace_mcp.settings import get_settings
 
@@ -224,10 +224,10 @@ def _match_pickup(points: list[PickupPoint], wanted: str) -> PickupPoint:
     if matches:
         options = "; ".join(f"№{p.number} {p.address}" for p in matches)
         msg = f"{wanted!r} matches several pickup points: {options}"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
     options = "; ".join(f"№{p.number} {p.address}" for p in available) or "none"
     msg = f"no selectable pickup point matches {wanted!r}; available: {options}"
-    raise OzonError(msg)
+    raise MarketplaceError(msg)
 
 
 def _match_payment_option(options: list[PaymentOption], wanted: str) -> PaymentOption:
@@ -263,7 +263,7 @@ def _match_payment_option(options: list[PaymentOption], wanted: str) -> PaymentO
 
     known = "; ".join(f"{o.payment_type}={o.kind or ''} {o.label or ''}".strip() for o in options)
     msg = f"no payment method matches {wanted!r}; available: {known}"
-    raise OzonError(msg)
+    raise MarketplaceError(msg)
 
 
 def _target_delivery(checkout: Checkout, split_key: str | None) -> Delivery:
@@ -276,17 +276,17 @@ def _target_delivery(checkout: Checkout, split_key: str | None) -> Delivery:
     deliveries = checkout.deliveries
     if not deliveries:
         msg = "checkout exposes no destination to change"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
     if split_key is not None:
         for delivery in deliveries:
             if split_key in delivery.split_keys:
                 return delivery
         msg = f"no shipment {split_key} in this order"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
     if len(deliveries) > 1:
         keys = ", ".join(key for delivery in deliveries for key in delivery.split_keys)
         msg = f"order has several destinations; pass split_key (one of: {keys})"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
     return deliveries[0]
 
 
@@ -356,7 +356,7 @@ def configure_checkout(
         link = pickup_apply_link(state, chosen.address_book_id or "")
         if link is None:
             msg = f"pickup point {chosen.address} is not selectable for this shipment"
-            raise OzonError(msg)
+            raise MarketplaceError(msg)
         checkout = _apply(link)
     if payment is not None:
         option = _match_payment_option(checkout.payment_options, payment)
@@ -379,7 +379,7 @@ def _set_pay_after_receipt(checkout: Checkout, *, enabled: bool) -> Checkout:
         spending = next((option for option in checkout.points if option.selected and option.amount), None)
         because = f" — points are being spent ({spending.amount}); clear them with points=0 first" if spending else ""
         msg = f"pay-on-delivery is not offered for this order{because}"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
     # The link flips whatever state it finds, so press it only when the current
     # state is not the one asked for.
     if switch.enabled == enabled or not switch.toggle_link:
@@ -398,7 +398,7 @@ def _set_points(checkout: Checkout, points: int) -> Checkout:
     if wanted is None:
         offered = ", ".join(str(option.amount or 0) for option in checkout.points)
         msg = f"Ozon does not offer spending {points} points here; offered: {offered or 'none'}"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
     if wanted.selected or not wanted.apply_link:
         return checkout
     return _apply(wanted.apply_link)
@@ -434,7 +434,7 @@ def place_order(confirm_total: str) -> OrderPlaced:
     checkout = start_checkout(with_points=False)
     if not checkout.available:
         msg = checkout.reason or "no order to place"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
     actual = checkout.totals.total
     order_total = checkout.totals.order_total
     confirmed = _digits(confirm_total)
@@ -462,4 +462,4 @@ def place_order(confirm_total: str) -> OrderPlaced:
         pooling = data.get("poolingDetails") or {}
         time.sleep((pooling.get("delay") or 500) / 1000)
     msg = "order creation did not finish in time; check the orders list before retrying"
-    raise OzonError(msg)
+    raise MarketplaceError(msg)

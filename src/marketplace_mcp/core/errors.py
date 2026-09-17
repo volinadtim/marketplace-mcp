@@ -35,8 +35,8 @@ class ErrorCode(StrEnum):
     """The confirmed total is no longer what Ozon charges. Nothing was ordered."""
 
 
-class OzonError(RuntimeError):
-    """Base class for errors this server raises to the caller.
+class MarketplaceError(RuntimeError):
+    """Base class for every error this server raises, whichever marketplace.
 
     MCP hands a caller the message and nothing else, so the code is prefixed to
     it: a caller that wants to branch reads the prefix, and one that relays the
@@ -49,7 +49,7 @@ class OzonError(RuntimeError):
         super().__init__(f"[{self.code}] {message}")
 
 
-class UpstreamError(OzonError):
+class UpstreamError(MarketplaceError):
     """Ozon did not answer with a page this server can read.
 
     Raised instead of returning an empty one, because the two are
@@ -83,7 +83,7 @@ class RateLimitedError(UpstreamError):
     def __init__(self, retry_after: float | None = None) -> None:
         self.retry_after = retry_after
         waited = f" It asked to wait {retry_after:.0f}s." if retry_after else ""
-        OzonError.__init__(
+        MarketplaceError.__init__(
             self,
             f"Ozon is rate-limiting this session (HTTP 429) and the retries did not clear it.{waited} "
             "Nothing was read. Slow down or try again later.",
@@ -91,7 +91,7 @@ class RateLimitedError(UpstreamError):
         self.status = 429
 
 
-class WritesDisabledError(OzonError):
+class WritesDisabledError(MarketplaceError):
     """Raised when a mutating tool is called while writes are disabled."""
 
     code = ErrorCode.WRITES_DISABLED
@@ -104,7 +104,7 @@ class WritesDisabledError(OzonError):
         )
 
 
-class OrdersDisabledError(OzonError):
+class OrdersDisabledError(MarketplaceError):
     """Placing an order is gated separately from other writes: it spends money
     and cannot be undone through this server.
     """
@@ -119,7 +119,7 @@ class OrdersDisabledError(OzonError):
         )
 
 
-class TotalMismatchError(OzonError):
+class TotalMismatchError(MarketplaceError):
     """The total confirmed by the caller is not the total Ozon is charging.
 
     Ozon recalculates a pending order on its own (prices, delivery), so a total
@@ -137,7 +137,7 @@ class TotalMismatchError(OzonError):
         )
 
 
-class SessionExpiredError(OzonError):
+class SessionExpiredError(MarketplaceError):
     """The stored session is signed out and could not be restored.
 
     Raised instead of returning empty results, which is what a signed-out

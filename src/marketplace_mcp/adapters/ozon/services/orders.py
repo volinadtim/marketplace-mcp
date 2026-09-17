@@ -16,7 +16,7 @@ from marketplace_mcp.adapters.ozon.parsing.orders import (
     parse_orders,
 )
 from marketplace_mcp.adapters.ozon.parsing.returns import parse_returns
-from marketplace_mcp.core.errors import OzonError, WritesDisabledError
+from marketplace_mcp.core.errors import MarketplaceError, WritesDisabledError
 from marketplace_mcp.core.utils.money import format_money, to_kopecks
 from marketplace_mcp.core.utils.serde import dumps, loads
 from marketplace_mcp.settings import get_settings
@@ -137,7 +137,7 @@ def _cancel_postings_modal(order: str) -> str:
     link = ((response.get("action") or {}) or {}).get("link")
     if not link:
         msg = f"order {order} cannot be cancelled (Ozon offered no cancel form)"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
     return str(link)
 
 
@@ -189,13 +189,13 @@ def _select_postings(order: str, modal: str, skus: list[str]) -> dict[str, Any]:
     unknown = [sku for sku in skus if sku not in titles]
     if unknown:
         msg = f"order {order} does not contain {', '.join(unknown)}"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
 
     state = widget(session.fetch(modal, backend="entrypoint"), "cancelPostingsRms") or {}
     lines = _postings(state)
     if not lines:
         msg = f"order {order} exposes no cancellable lines"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
 
     wanted: list[str] = []
     for sku in skus:
@@ -203,7 +203,7 @@ def _select_postings(order: str, modal: str, skus: list[str]) -> dict[str, Any]:
         match = next((pid for pid, subtitle in lines if subtitle and title.startswith(subtitle[:20])), None)
         if match is None:
             msg = f"could not find the line for {sku} in order {order}"
-            raise OzonError(msg)
+            raise MarketplaceError(msg)
         wanted.append(match)
 
     selected: dict[str, Any] = {}
@@ -215,7 +215,7 @@ def _select_postings(order: str, modal: str, skus: list[str]) -> dict[str, Any]:
     chosen = re.findall(r"\d{6,}", str((action.get("params") or {}).get("ItemIds") or ""))
     if set(chosen) != set(skus):
         msg = f"Ozon selected {chosen or 'nothing'} instead of {skus}; refusing to cancel"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
     return selected
 
 
@@ -240,7 +240,7 @@ def _reasons_modal(order: str, skus: list[str] | None = None) -> tuple[str, dict
         params = carried.get("Parameters")
         if not isinstance(params, dict):
             msg = f"order {order} exposes no cancellation parameters"
-            raise OzonError(msg)
+            raise MarketplaceError(msg)
         return entry, params
 
     # Load the form before acting on it: Ozon builds the per-order form on that
@@ -254,12 +254,12 @@ def _reasons_modal(order: str, skus: list[str] | None = None) -> tuple[str, dict
     action = button.get("action") or (button.get("common") or {}).get("action") or {}
     if not action.get("link"):
         msg = f"order {order} can no longer be cancelled (already delivered, or nothing left in it)"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
     opened = session.action(str(action["link"]), action.get("params") or {})
     link = ((opened.get("data") or {}).get("action") or {}).get("link")
     if not link:
         msg = "Ozon did not return the cancellation reasons"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
     return str(link), dict(action.get("params") or {})
 
 
@@ -318,7 +318,7 @@ def resolve_order(order: str) -> str:
         f"{order!r} is neither an order number nor a link that carries one; "
         "pass order_number or detail_link from list_orders()"
     )
-    raise OzonError(msg)
+    raise MarketplaceError(msg)
 
 
 def list_cancel_reasons(order: str) -> list[CancelReason]:
@@ -398,7 +398,7 @@ def cancel_order(
     order = resolve_order(order)
     if reason_id == _NEEDS_COMMENT_REASON and not comment.strip():
         msg = f"reason {reason_id} requires a comment"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
 
     session = get_session()
     link, params = _reasons_modal(order, skus)
@@ -483,7 +483,7 @@ def pay_order(order: str) -> PaymentRequested:
     page = session.fetch(f"/my/orderdetails/?order={order}")
     if not _order_exists(page):
         msg = f"there is no order {order} on this account — check the number against list_orders()"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
     starter = _follow_action(page, _PAY_ACTION)
     params = (starter or {}).get("params") or {}
     amount = _money(params.get("totalPrice") or params.get("finalPrepayPrice"))
@@ -587,7 +587,7 @@ def order_parcels(order: str) -> list[OrderDetail]:
     page = session.fetch(f"/my/orderdetails/?order={order}")
     if not _order_exists(page):
         msg = f"there is no order {order} on this account — check the number against list_orders()"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
 
     parcels = [
         str(state["shipmentId"])

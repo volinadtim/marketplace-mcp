@@ -10,7 +10,7 @@ from __future__ import annotations
 import pytest
 
 from marketplace_mcp.adapters.ozon.services import selections
-from marketplace_mcp.core.errors import OzonError
+from marketplace_mcp.core.errors import MarketplaceError
 from support import FakeSession, page
 
 UUID = "01a05d2c-845c-7190-b203-a347bb6482e5"
@@ -84,6 +84,6 @@ def test_setting_the_items_replaces_the_whole_list(session: FakeSession, writes_
 
 def test_a_refused_creation_raises_rather_than_returning_a_ghost(session: FakeSession, writes_on: None) -> None:
     session.actions = {"submitSelectionFormWeb": {"error": "Пустое название вишлиста"}}
-    with pytest.raises(OzonError) as raised:
+    with pytest.raises(MarketplaceError) as raised:
         selections.create_selection("", "3077454533")
     assert "Пустое название вишлиста" in str(raised.value)

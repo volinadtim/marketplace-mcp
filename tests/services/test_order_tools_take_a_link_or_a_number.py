@@ -7,7 +7,7 @@ import base64
 import pytest
 
 from marketplace_mcp.adapters.ozon.services import orders
-from marketplace_mcp.core.errors import OzonError, WritesDisabledError
+from marketplace_mcp.core.errors import MarketplaceError, WritesDisabledError
 from marketplace_mcp.core.utils.serde import dumps
 from support import FakeSession, page
 
@@ -19,7 +19,7 @@ LINK = (
 def test_paying_an_order_that_does_not_exist_says_so(session: FakeSession, writes_on: None) -> None:
     # Ozon serves an unknown number a valid page with no order on it.
     session.pages = {"/my/orderdetails": page(skuGrid={"products": []})}
-    with pytest.raises(OzonError) as raised:
+    with pytest.raises(MarketplaceError) as raised:
         orders.pay_order("00000000-0000")
     assert "no order 00000000-0000" in str(raised.value)
 
@@ -41,6 +41,6 @@ def test_cancelling_without_the_gate_is_refused_first(session: FakeSession) -> N
 
 
 def test_a_comment_is_required_by_the_catch_all_reason(session: FakeSession, writes_on: None) -> None:
-    with pytest.raises(OzonError) as raised:
+    with pytest.raises(MarketplaceError) as raised:
         orders.cancel_order("44563249-0877", reason_id="508")
     assert "comment" in str(raised.value).lower()

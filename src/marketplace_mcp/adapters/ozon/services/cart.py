@@ -19,7 +19,7 @@ from marketplace_mcp.adapters.ozon.models.cart import Cart, CartItem
 from marketplace_mcp.adapters.ozon.models.common import WriteResult
 from marketplace_mcp.adapters.ozon.parsing.cart import parse_cart
 from marketplace_mcp.adapters.ozon.parsing.common import declared_count, next_pages
-from marketplace_mcp.core.errors import OzonError, WritesDisabledError
+from marketplace_mcp.core.errors import MarketplaceError, WritesDisabledError
 from marketplace_mcp.core.utils.serde import dumps
 from marketplace_mcp.settings import get_settings
 
@@ -120,11 +120,11 @@ def select_cart_items(skus: list[str] | None = None, mode: str = "only") -> Cart
     _require_writes()
     if mode not in SELECTION_MODES:
         msg = f"unknown mode {mode!r}; use one of {', '.join(SELECTION_MODES)}"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
     wanted = [str(sku) for sku in skus or []]
     if mode in {"only", "add", "remove"} and not wanted:
         msg = f"mode {mode!r} needs at least one sku"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
 
     if mode == "all":
         _send_selection(_SELECT_ALL)

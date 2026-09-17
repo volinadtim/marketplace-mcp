@@ -29,7 +29,7 @@ from marketplace_mcp.adapters.ozon.models.orders import OrderProduct
 from marketplace_mcp.adapters.ozon.parsing import catalog as parse
 from marketplace_mcp.adapters.ozon.parsing.common import declared_counter, next_pages
 from marketplace_mcp.adapters.ozon.parsing.orders import ORDER_NUMBER_RE, order_numbers_from_link, parse_order_products
-from marketplace_mcp.core.errors import OzonError
+from marketplace_mcp.core.errors import MarketplaceError
 from marketplace_mcp.core.utils.serde import dumps
 
 _MAX_TILE_PAGES: Final = 200
@@ -109,7 +109,7 @@ def search(
     value = SEARCH_SORTS.get(sort, sort)
     if not query and not category:
         msg = "search needs a query, a category, or both"
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
     base = f"/category/{category.strip('/')}/" if category else "/search/"
     tiles: list[Tile] = []
     seen: set[str] = set()
@@ -293,7 +293,7 @@ def find_cheaper(sku_or_url: str, limit: int = 10) -> Cheaper:
             f"could not read the price of {product.sku or sku_or_url}, so nothing can be called cheaper than it — "
             "read the card with product_details() and compare by hand"
         )
-        raise OzonError(msg)
+        raise MarketplaceError(msg)
 
     offers = _other_offers(product.sku or _sku(sku_or_url))
     found = [

@@ -11,7 +11,7 @@ import pytest
 
 from marketplace_mcp.adapters.ozon.models.checkout import Checkout, Delivery
 from marketplace_mcp.adapters.ozon.services.checkout import _target_delivery
-from marketplace_mcp.core.errors import OzonError
+from marketplace_mcp.core.errors import MarketplaceError
 
 
 def _checkout(*deliveries: Delivery) -> Checkout:
@@ -26,13 +26,13 @@ def test_target_delivery_requires_split_key() -> None:
     assert _target_delivery(_checkout(first), None) is first
 
     # Several: refuse rather than move the wrong parcel.
-    with pytest.raises(OzonError, match="several destinations"):
+    with pytest.raises(MarketplaceError, match="several destinations"):
         _target_delivery(_checkout(first, second), None)
 
     assert _target_delivery(_checkout(first, second), "FBS-2-S2") is second
 
-    with pytest.raises(OzonError, match="no shipment"):
+    with pytest.raises(MarketplaceError, match="no shipment"):
         _target_delivery(_checkout(first, second), "FBS-9-S9")
 
-    with pytest.raises(OzonError, match="no destination"):
+    with pytest.raises(MarketplaceError, match="no destination"):
         _target_delivery(_checkout(), None)
